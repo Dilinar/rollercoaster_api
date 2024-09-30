@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+
+  web:
+    build: .
+    ports:
+      - "3051:3051"
+    environment:
+      - NODE_ENV=production
+      - REDIS_HOST=172.17.0.1
+      - REDIS_PORT=6379
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
