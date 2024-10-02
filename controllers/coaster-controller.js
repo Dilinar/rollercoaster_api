@@ -62,10 +62,10 @@ async function addWagonToCoaster(req, res) {
         return res.status(404).json({ error: 'Coaster not found' });
     }
 
-    if (coaster.wagons.length === coaster.wagnos_cap) {
+    if (coaster.wagons.length === coaster.wagons_cap) {
         logger.warn(`Coaster: ${coasterId} has reached maximum number of wagons`);
         return res.status(400).json({ error: 'Coaster has reached maximum number of wagons' });
-    } else if (coaster.wagons.length > coaster.wagnos_cap) {
+    } else if (coaster.wagons.length > coaster.wagons_cap) {
         logger.warn(`Coaster: ${coasterId} has exceeded maximum number of wagons`);
         return res.status(400).json({ error: 'Coaster has exceeded maximum number of wagons' });
     }
@@ -171,15 +171,28 @@ async function deletePersonelFromCoaster(req, res) {
 
 async function updateCoaster(req, res) {
     const { coasterId } = req.params;
-    const data = req.body;
+    const { required_personnel, wagons_cap, customers, hours_from, hours_to } = req.body;
+
+    if (!required_personnel || !wagons_cap, !customers || !hours_from || !hours_to) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const updatedCoaster = {
+        required_personnel,
+        wagons_cap,
+        customers,
+        hours_from,
+        hours_to,
+    };
+
     const coaster = await getData(`coaster:${coasterId}`);
     if (!coaster) {
-        logger.warn(`Coaster not found: ${coasterId}`);
+        logger.warn(`Coaster: ${coasterId} not found`);
         return res.status(404).json({ error: 'Coaster not found' });
     }
-    Object.assign(coaster, data);
+    Object.assign(coaster, updatedCoaster);
     await setData(`coaster:${coasterId}`, coaster);
-    logger.info(`Coaster updated: ${coasterId}`);
+    logger.info(`Coaster: ${coasterId} updated`);
     res.status(200).json({ message: 'Coaster updated successfully' });
 }
 
